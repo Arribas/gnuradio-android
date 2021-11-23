@@ -9,7 +9,7 @@ RUN sed -i 's/security.ubuntu.com/old-releases.ubuntu.com/g' /etc/apt/sources.li
 
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update
-RUN apt-get install -y git vim wget unzip sudo xserver-xorg openjdk-11-jre cmake libtool build-essential pkg-config autogen ocaml ocamlbuild bison flex texinfo python-dev python-mako python-six swig3.0 python3-mako python3-numpy python3-distutils
+RUN apt-get install -y nano gedit git vim wget unzip sudo xserver-xorg openjdk-11-jre cmake libtool build-essential pkg-config autogen ocaml ocamlbuild bison flex texinfo python-dev python-mako python-six swig3.0 python3-mako python3-numpy python3-distutils
 
 RUN groupadd -g 1000 -r $USER
 RUN useradd -u 1000 -g 1000 --create-home -r $USER
@@ -55,6 +55,18 @@ RUN yes | ./sdkmanager --sdk_root=${ANDROID_HOME} "platform-tools"
 RUN yes | ./sdkmanager --sdk_root=${ANDROID_HOME} "build-tools;30.0.0"
 RUN yes | ./sdkmanager --sdk_root=${ANDROID_HOME} "cmake;3.10.2.4988404"
 RUN yes | ./sdkmanager --sdk_root=${ANDROID_HOME} "cmdline-tools;latest"
+
+#ADD precompiled GCC support with fortran
+
+COPY gcc-arm64-linux-x86_64.tar.bz2 /home/$USER/src
+COPY gcc-arm-linux-x86_64.tar.bz2 /home/$USER/src
+
+RUN tar -xvf /home/$USER/src/gcc-arm-linux-x86_64.tar.bz2 --strip-components=1 -C $ANDROID_HOME/ndk/21.3.6528147/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64
+RUN tar -xvf /home/$USER/src/gcc-arm64-linux-x86_64.tar.bz2 --strip-components=1 -C $ANDROID_HOME/ndk/21.3.6528147/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64
+
+COPY android.toolchain_r17c.cmake /home/$USER/src
+RUN cp $ANDROID_HOME/ndk/21.3.6528147/build/cmake/android.toolchain.cmake $ANDROID_HOME/ndk/21.3.6528147/build/cmake/android.toolchain_r21.3.cmake
+RUN cp /home/$USER/src/android.toolchain_r17c.cmake $ANDROID_HOME/ndk/21.3.6528147/build/cmake/android.toolchain_r17c.cmake
 
 WORKDIR /home/$USER/src/gnuradio-android
 RUN ./build.sh
