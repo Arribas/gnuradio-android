@@ -29,7 +29,45 @@ export NCORES=$(getconf _NPROCESSORS_ONLN)
 #	ln -s ${PREFIX}/include/boost-1_69/boost/ ${PREFIX}/include/boost
 #fi
 
-cd ${BUILD_ROOT}/gnss-sdr
+rm gnss-sdr-android -rf
+git clone https://github.com/gnss-sdr/gnss-sdr.git gnss-sdr-android
+
+cd gnss-sdr-android
+git checkout android
+
+
+#build gnss-sdr VOLK
+
+#rm -rf ${BUILD_ROOT}/gnss-sdr/src/algorithms/libs/volk_gnsssdr_module/volk_gnsssdr/build64/
+#mkdir ${BUILD_ROOT}/gnss-sdr/src/algorithms/libs/volk_gnsssdr_module/volk_gnsssdr/build64/
+#cd ${BUILD_ROOT}/gnss-sdr/src/algorithms/libs/volk_gnsssdr_module/volk_gnsssdr/build64/
+
+rm -rf src/algorithms/libs/volk_gnsssdr_module/volk_gnsssdr/build64/
+mkdir src/algorithms/libs/volk_gnsssdr_module/volk_gnsssdr/build64/
+cd src/algorithms/libs/volk_gnsssdr_module/volk_gnsssdr/build64/
+
+cmake -DCMAKE_INSTALL_PREFIX=${PREFIX} \
+  -DCMAKE_TOOLCHAIN_FILE=${TOOLCHAIN_ROOT}/build/cmake/android.toolchain.cmake \
+  -DANDROID_ABI=arm64-v8a -DANDROID_ARM_NEON=ON \
+  -DANDROID_NATIVE_API_LEVEL=${API_LEVEL} \
+  -DANDROID_STL=c++_shared \
+  -DBOOST_ROOT=${PREFIX} \
+  -DBoost_COMPILER=-clang \
+  -DBoost_USE_STATIC_LIBS=ON \
+  -DBoost_ARCHITECTURE=-a64 \
+  -DCMAKE_FIND_ROOT_PATH=${PREFIX} \
+  -DENABLE_OWN_CPUFEATURES=ON \
+  ../
+
+
+make -j${NCORES}
+make install
+
+
+#build gnss-sdr
+
+cd ${BUILD_ROOT}/gnss-sdr-android
+
 rm build64 -rf
 mkdir build64
 cd build64
@@ -72,6 +110,5 @@ cmake -DCMAKE_INSTALL_PREFIX=${PREFIX} \
   -DENABLE_OSMOSDR=ON \
   ../
 
-exit
-make
+make -j${NCORES}
 make install

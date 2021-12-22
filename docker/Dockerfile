@@ -27,7 +27,8 @@ USER $USER
 RUN mkdir -p /home/$USER/src
 WORKDIR /home/$USER/src
 
-RUN git clone --recursive https://github.com/bastibl/gnuradio-android.git
+#RUN git clone --recursive https://github.com/bastibl/gnuradio-android.git
+RUN git clone --recursive https://github.com/Arribas/gnuradio-android.git
 
 WORKDIR /home/$USER/src/gnuradio-android/thrift
 RUN git clean -xdf
@@ -71,6 +72,7 @@ RUN cp /home/$USER/src/android.toolchain_r17c.cmake $ANDROID_HOME/ndk/21.3.65281
 WORKDIR /home/$USER/src/gnuradio-android
 RUN ./build.sh
 RUN ./build_aarch64.sh
+RUN ./build_gnss_toolchain.sh
 
 WORKDIR /home/$USER/src
 RUN git clone https://github.com/bastibl/android-benchmark.git

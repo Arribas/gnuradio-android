@@ -1,0 +1,1 @@
+docker run -it --privileged -v /dev/bus/usb:/dev/bus/usb --net=host --env="DISPLAY" --volume="$HOME/.Xauthority:/home/android/.Xauthority:rw" --volume="$PWD/docker_shared_folder:/home/android/host_files:rw" gnuradio-android
